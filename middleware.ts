@@ -4,13 +4,19 @@ export default authMiddleware({
   publicRoutes: ["/", "/api/webhooks/clerk", "/api/webhooks/stripe", "/favicon.ico"],
   debug: true,
 
-  // This prevents Clerk from trying to auth non-browser requests like Vercel's favicon fetcher
   beforeAuth: (req) => {
     const userAgent = req.headers.get("user-agent") || "";
-    if (userAgent.includes("vercel-favicon") || userAgent.includes("bot") || userAgent.includes("crawl")) {
-      return false;
+
+    // Skip Clerk for non-browser requests (like vercel-favicon or bots)
+    if (
+      userAgent.includes("vercel-favicon") ||
+      userAgent.toLowerCase().includes("bot") ||
+      userAgent.toLowerCase().includes("crawl")
+    ) {
+      return false; // ❗️This is valid – tells Clerk to skip auth
     }
-    return true;
+
+    // ❌ Don't return true — just allow default behavior by returning nothing
   },
 });
 
